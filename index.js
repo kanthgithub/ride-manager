@@ -1,21 +1,35 @@
 'use strict';
 
-const express = require('express');
-const app = express();
-const port = 8010;
-
 const bodyParser = require('body-parser');
 const jsonParser = bodyParser.json();
+const express = require('express');
+const app = express();
 
-const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database(':memory:');
+app.use(bodyParser.urlencoded({extended: true}),)
+    .use(bodyParser.json());
 
-const buildSchemas = require('./src/schemas');
-
-db.serialize(() => {
-    buildSchemas(db);
-
-    const app = require('./src/app')(db);
-
-    app.listen(port, () => console.log(`App started and listening on port ${port}`));
+app.get('/swagger.json', (req, res) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(swaggerSpec);
 });
+
+app.use(express.static('doc'));
+
+app.get('/docs', (req, res) => {
+    res.sendFile(rootPath.join(__dirname, 'html/doc.html'));
+});
+
+const cors = require('cors');
+const riderRoutes = require('./src/routes/RiderRoutes');
+
+app.use("/", riderRoutes)
+    .use(function (req, res) {
+        return res.status(404).send({message: 'Route' + req.url + ' Not found.'});
+    })
+    .use(cors);
+
+const port = process.env.PORT || 8010;
+
+app.listen(port, () => console.log(`App started and listening on port ${port}`));
+
+module.exports = app;
