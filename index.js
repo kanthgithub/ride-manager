@@ -20,7 +20,7 @@ app.get('/docs', (req, res) => {
 });
 
 const cors = require('cors');
-const riderRoutes = require('./src/routes/RiderRoutes');
+const riderRoutes = require('./src/routes/RiderRouter');
 
 app.use("/", riderRoutes)
     .use(function (req, res) {
@@ -28,7 +28,9 @@ app.use("/", riderRoutes)
     })
     .use(cors);
 
+require('dotenv').config()
 const port = process.env.PORT || 8010;
+
 
 app.listen(port, () => console.log(`App started and listening on port ${port}`));
 
