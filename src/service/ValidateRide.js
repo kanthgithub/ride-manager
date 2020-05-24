@@ -1,4 +1,5 @@
 module.exports = async (data) => {
+
     const startLatitude = Number(data.start_lat);
     const startLongitude = Number(data.start_long);
     const endLatitude = Number(data.end_lat);
@@ -42,5 +43,7 @@ module.exports = async (data) => {
         };
     }
 
-    return [data.start_lat, data.start_long, data.end_lat, data.end_long, data.rider_name, data.driver_name, data.driver_vehicle];
+    let response = [data.start_lat, data.start_long, data.end_lat, data.end_long, data.rider_name, data.driver_name, data.driver_vehicle];
+
+    return response;
 };

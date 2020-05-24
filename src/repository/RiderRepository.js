@@ -1,12 +1,14 @@
-const db = require('../db');
+const db = require('./db');
+const util = require('util');
 
-const RiderRepository = {
+const riderRepository = {
 
     createRide : async (riderData) => {
       try {
-            const lastID = await dbRun('INSERT INTO Rides(startLat, startLong, endLat, endLong, riderName, driverName, driverVehicle) VALUES (?, ?, ?, ?, ?, ?, ?)', riderData);
-            return await dbAll('SELECT * FROM Rides WHERE rideID = ?', lastID);
+            const lastID = await riderRepository.dbRun("INSERT INTO Rides(startLat, startLong, endLat, endLong, riderName, driverName, driverVehicle) VALUES (?, ?, ?, ?, ?, ?, ?)", riderData);
+            return await riderRepository.dbAll("SELECT * FROM Rides WHERE rideID = ?", lastID);
         } catch (error) {
+            console.log(`error: ${error}`);
             return null;
         }
     },
@@ -15,7 +17,7 @@ const RiderRepository = {
      * Fetch all Rides in System
      * @returns {Promise<*>}
      */
-    findAllRides: async (page, limit) => {
+    findAllRides: async (offset, limit) => {
         let sql = 'SELECT * FROM Rides';
         let params = [];
         if (page) {
@@ -31,7 +33,7 @@ const RiderRepository = {
         }
     },
 
-    dbOne : async (id) => {
+    getRideDetails : async (id) => {
      try {
             return await dbAll('SELECT * FROM Rides WHERE rideID=?', [id]);
         } catch (error) {
@@ -62,14 +64,14 @@ const RiderRepository = {
         }
     }, 
 
-    dbRun : (sql, params) => {
+    dbRun : async (sql, params) => {
         return new Promise((resolve, reject) => {
             db.run(sql, params, function (err) {
                 if (err) reject({ error_code: 'SERVER_ERROR', message: 'Unknown error' });
                 resolve(this.lastID);
             });
         });
-    };
+    },
 }
 
-module.exports = RiderRepository;
+module.exports = riderRepository;

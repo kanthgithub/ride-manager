@@ -1,19 +1,23 @@
 const riderRepository = require('../repository/RiderRepository');
-const validateRide = require('../ValidateRide')
+const validateRide = require('./ValidateRide')
 
-const RiderService = {
+const riderService = {
 
     createRide : async (rideRequest) => {
-        return riderRepository.createRide(validateRide(rideRequest));
+        let rideDataParameters = await validateRide(rideRequest);
+        return riderRepository.createRide(rideDataParameters);
     },
 
     findAllRides : async (rideRequestParameters) => {
-        return riderRepository.findAllRides(rideRequestParameters);
+        let limit = rideRequestParameters.limit || 10;
+        let page = rideRequestParameters.page || 1;
+        let offset = (page * limit) - limit;
+        return riderRepository.findAllRides(offset,limit);
     },
 
-    findRideDetails : async (id) => {
-        return riderRepository.findRideDetails(id);
+    getRideDetails : async (id) => {
+        return riderRepository.getRideDetails(id);
     }
 };
 
-module.exports = RiderService;
+module.exports = riderService;

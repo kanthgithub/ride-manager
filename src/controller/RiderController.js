@@ -1,44 +1,57 @@
 const riderService = require('../service/RiderService');
 
-module.exports = {
+const riderController = {
 
     createRide : async (request, response) => {
         let responseData = await riderService.createRide(request.body);
-         if (responseData.data) {
-            jsonData.data = responseData.data;
+        let statusCode = 201;
+        let jsonData = null;
+        if (responseData) {
+            jsonData = responseData;
+        }else{
+           statusCode =  500;
         }
          response
-            .status(responseData.statusCode)
+            .status(statusCode)
             .json(jsonData);
     },
 
     healthCheck : async (request, response) => {
-        let responseData = await riderService.healthCheck(request.body);
-         if (responseData.data) {
-            jsonData.data = responseData.data;
-        }
+        //let responseData = await riderService.healthCheck(request.body);
+        let statusCode = 200;
+        let jsonData = 'healthy';
          response
-            .status(responseData.statusCode)
+            .status(statusCode)
             .json(jsonData);
     },
 
     findAllRides : async (request, response) => {
-        let responseData = await riderService.findAllRides(request.body);
-         if (responseData.data) {
-            jsonData.data = responseData.data;
+        let responseData = await riderService.findAllRides(request.query);
+        let statusCode = 200;
+        let jsonData = null;
+        if (responseData) {
+            jsonData = responseData;
+        }else{
+           statusCode =  500;
         }
          response
-            .status(responseData.statusCode)
+            .status(statusCode)
             .json(jsonData);
     },
 
-    findARideDetail : async (request, response) => {
-        let responseData = await riderService.findARideDetail(request.body);
-         if (responseData.data) {
-            jsonData.data = responseData.data;
+    getRideDetail : async (request, response) => {
+        let responseData = await riderService.getRideDetails(request.params["id"]);
+        let statusCode = 200;
+        let jsonData = null;
+        if (responseData) {
+            jsonData = responseData;
+        }else{
+           statusCode =  500;
         }
          response
-            .status(responseData.statusCode)
+            .status(statusCode)
             .json(jsonData);
     }
 };
+
+module.exports = riderController;
