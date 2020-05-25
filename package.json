@@ -8,6 +8,8 @@
   },
   "scripts": {
     "test": "mocha --recursive tests",
+    "health_service_test": "mocha tests/service/api_health.test.js",
+    "rider_service_test": "mocha tests/service/RiderService.test.js",
     "start": "nodemon index.js",
     "debug": "nodemon --inspect-brk=9229 index.js"
   },

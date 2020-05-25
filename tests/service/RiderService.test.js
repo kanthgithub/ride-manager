@@ -12,9 +12,9 @@ const riderRepository = require('../../src/repository/RiderRepository');
 
 var app ;
 describe('API tests', () => {
+    process.env.MODE = 'TEST';
     before((done) => {
          app = require('../../index', { bustCache: true });
-        process.env.MODE = 'test';
         db.serialize((err) => { 
             if (err) {
                 return done(err);
@@ -27,10 +27,20 @@ describe('API tests', () => {
     after( (done) => {
         // delete the cached module:
         decache('../../index');
-        delete process.env.MODE;
         console.log(`closing express test server`);
         done();
         console.log(`done - closing express test server`);
+    });
+
+    afterEach((done) => {
+        decache('../../index');
+        riderRepository.dbRunDeleteAll(`DELETE FROM Rides`,1)
+        .then((result) => {
+            console.log("Success", result);
+        }).catch((error) => {
+            console.log("Error", error);
+        });
+        done();
     });
 
     it('RiderService should create new ride', (done) => {
@@ -56,9 +66,10 @@ describe('API tests', () => {
     });
 
     it('RiderService should extract all rides', (done) => {
+        riderRepository.dbRunDeleteAll(`DELETE FROM Rides`,1);
 
-        for (let index=0; index < 10; index++) {
-             riderRepository.dbRun(`
+        for (let index=0; index < 8; index++) {
+             riderRepository.dbRunCreate(`
                 INSERT INTO Rides (startLat, startLong, endLat, endLong, riderName, driverName, driverVehicle)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             `, [75, 65, 66, 77, 'Lakshmi', 'Kanth', 'SUV']);
@@ -71,7 +82,7 @@ describe('API tests', () => {
             .end(function(err, res) {
                 if (err) return done(err);
                 console.log(`rides: ${JSON.stringify(res)}`);
-                assert.equal(res.body.length, 10);
+                assert.equal(res.body.length, 8);
                 done();
             });
     });

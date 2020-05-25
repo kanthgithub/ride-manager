@@ -7,7 +7,7 @@ const riderRepository = {
 
     createRide : async (riderData) => {
       try {
-            const lastID = await riderRepository.dbRun("INSERT INTO Rides(startLat, startLong, endLat, endLong, riderName, driverName, driverVehicle) VALUES (?, ?, ?, ?, ?, ?, ?)", riderData);
+            const lastID = await riderRepository.dbRunCreate("INSERT INTO Rides(startLat, startLong, endLat, endLong, riderName, driverName, driverVehicle) VALUES (?, ?, ?, ?, ?, ?, ?)", riderData);
             return await riderRepository.getRideDetails(lastID);
         } catch (error) {
             return null;
@@ -56,12 +56,30 @@ const riderRepository = {
         });
     },
 
-    dbRun : (sql, params) => {
+    dbRunCreate : (sql, params) => {
         return new Promise((resolve, reject) => {
             db.run(sql, params, function (err) {
-                if (err) reject({ error_code: 'SERVER_ERROR', message: 'Unknown error' });
+                if (err) { 
+                    reject({ error_code: 'SERVER_ERROR', message: 'Unknown error' });
+                    logger.error(`dbRunCreate err: ${err}`);
+                }
                 resolve(this.lastID);
             });
+        });
+    },
+
+    dbRunDeleteAll : (sql, id) => {
+        return new Promise((resolve, reject) => {
+            db.run(sql, function(err) {
+                if (err) {
+                   console.error(err.message);
+                   reject(true)
+                }
+                console.log(`Row(s) deleted ${this.changes}`);
+                console.log(`row deleted`);
+                resolve(this.changes);
+              }
+            );
         });
     },
 }
