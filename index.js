@@ -31,7 +31,8 @@ app.use("/", riderRoutes)
 require('dotenv').config()
 const port = process.env.PORT || 8010;
 
+const logger = require('./src/constants/logger');
 
-app.listen(port, () => console.log(`App started and listening on port ${port}`));
+app.listen(port, () => logger.info(`App started and listening on port ${port}`));
 
 module.exports = app;

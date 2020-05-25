@@ -1,14 +1,15 @@
 const db = require('./db');
 const util = require('util');
+const riderErrorConstants = require('../constants/RiderErrorConstants');
+const logger = require('../constants/logger');
 
 const riderRepository = {
 
     createRide : async (riderData) => {
       try {
             const lastID = await riderRepository.dbRun("INSERT INTO Rides(startLat, startLong, endLat, endLong, riderName, driverName, driverVehicle) VALUES (?, ?, ?, ?, ?, ?, ?)", riderData);
-            return await riderRepository.dbAll("SELECT * FROM Rides WHERE rideID = ?", lastID);
+            return await riderRepository.getRideDetails(lastID);
         } catch (error) {
-            console.log(`error: ${error}`);
             return null;
         }
     },
@@ -18,53 +19,44 @@ const riderRepository = {
      * @returns {Promise<*>}
      */
     findAllRides: async (offset, limit) => {
-        let sql = 'SELECT * FROM Rides';
+        logger.debug(`RiderRepository - findAllRides: limit - ${limit} offset - ${offset}`)
         let params = [];
-        if (page) {
+        let sql;
+        if(offset>0 && limit >0){
             sql = 'SELECT * FROM Rides LIMIT ? OFFSET ?';
-            const offset = (page - 1) * limit;
             params = [ limit, offset ];
+        }else if(limit >0){
+            sql = 'SELECT * FROM Rides LIMIT ?';
+            params = [limit];
+        }else{
+            sql = 'SELECT * FROM Rides';     
         }
-        try {
-            const rows = await this.dbAll(sql, params);
-            return rows;
-        } catch (error) {
-            return null;
-        }
+        
+        return new Promise((resolve, reject) => {
+            db.all(sql, params, function(err, rows) {
+                if (err) {
+                    logger.error(`RiderRepository - findAllRides: error - ${err}`);
+                    return reject(err);
+                }
+                logger.debug(`RiderRepository - findAllRides: response - ${JSON.stringify(rows)}`);
+                return resolve(rows);
+            });
+        });
     },
 
     getRideDetails : async (id) => {
-     try {
-            return await dbAll('SELECT * FROM Rides WHERE rideID=?', [id]);
-        } catch (error) {
-            return null; 
-        }
+        return new Promise((resolve, reject) => {
+            db.all('SELECT * FROM Rides WHERE rideID=?', id, function(err, rows) {
+                if (err) {
+                    logger.error(`getRideDetails err: ${err}`);
+                    return reject(err);
+                }
+                return resolve(rows);
+            });
+        });
     },
 
-    dbAll : async (sql, params) => {
-        const promised = (util.promisify(db.all)).bind(db);
-        try {
-            const rows = await promised(sql, params);
-            if (rows.length === 0) {
-                throw {
-                    error_code: 'RIDES_NOT_FOUND_ERROR',
-                    message: 'Could not find any rides'
-                };
-            }
-            return rows;
-        } catch (error) {
-            if (error.error_code !== 'RIDES_NOT_FOUND_ERROR') {
-                throw {
-                    error_code: 'SERVER_ERROR',
-                    message: 'Unknown error'
-                };
-            } else {
-                throw error;
-            }
-        }
-    }, 
-
-    dbRun : async (sql, params) => {
+    dbRun : (sql, params) => {
         return new Promise((resolve, reject) => {
             db.run(sql, params, function (err) {
                 if (err) reject({ error_code: 'SERVER_ERROR', message: 'Unknown error' });

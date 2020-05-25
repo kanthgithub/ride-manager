@@ -14,9 +14,7 @@ describe('API tests', () => {
             if (err) {
                 return done(err);
             }
-
             buildSchemas(db);
-
             done();
         });
     });
