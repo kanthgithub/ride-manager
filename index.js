@@ -34,6 +34,6 @@ const logger = require('./src/constants/logger');
 const mode  = process.env.MODE || '';
 logger.info(`mode: ${mode}`);
 const port = (mode === 'dev') ? process.env.PORT : 8020;
-app.listen(port, () => logger.info(`App started and listening on port ${port}`));
+var server = app.listen(port, () => logger.info(`App started and listening on port ${port}`));
 app.on( 'close', () => logger.info(`Closing on port ${port}`) );
 module.exports = app;

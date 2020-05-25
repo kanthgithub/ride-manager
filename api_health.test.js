@@ -5,8 +5,9 @@ let describe = mocha.describe;
 const request = require('supertest');
 const sqlite3 = require('sqlite3').verbose();
 const db = new sqlite3.Database(':memory:');
-const buildSchemas = require('../../src/schemas/schemas');
+const buildSchemas = require('./src/schemas/schemas');
 const decache = require('decache');
+const assert = require('assert');
 
 var app;
 describe('API tests', () => {
