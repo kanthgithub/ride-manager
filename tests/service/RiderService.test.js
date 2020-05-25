@@ -8,10 +8,12 @@ const db = new sqlite3.Database(':memory:');
 const buildSchemas = require('../../src/schemas/schemas');
 const decache = require('decache');
 const assert = require('assert');
+const riderRepository = require('../../src/repository/RiderRepository');
 
-var app;
+var app ;
 describe('API tests', () => {
     before((done) => {
+         app = require('../../index', { bustCache: true });
         process.env.MODE = 'test';
         db.serialize((err) => { 
             if (err) {
@@ -19,8 +21,7 @@ describe('API tests', () => {
             }
             buildSchemas(db);
             done();
-        delete require.cache[require.resolve( '../../index' )]
-         app = require('../../index', { bustCache: true });
+        //delete require.cache[require.resolve( '../../index' )]
     })});
     
     after( (done) => {
@@ -50,20 +51,18 @@ describe('API tests', () => {
                 if (err) return done(err);
                 assert.equal(res.body[0].rideID, 1);
                 assert.ok(res.body[0].created);
-                done();
             });
+            done();
     });
 
     it('RiderService should extract all rides', (done) => {
 
-        for (let index=0; index < 10; i++) {
-            db.run(`
+        for (let index=0; index < 10; index++) {
+             riderRepository.dbRun(`
                 INSERT INTO Rides (startLat, startLong, endLat, endLong, riderName, driverName, driverVehicle)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             `, [75, 65, 66, 77, 'Lakshmi', 'Kanth', 'SUV']);
-            done();
         }
-
 
         request(app)
             .get('/rides')
@@ -71,6 +70,7 @@ describe('API tests', () => {
             .expect(200)
             .end(function(err, res) {
                 if (err) return done(err);
+                console.log(`rides: ${JSON.stringify(res)}`);
                 assert.equal(res.body.length, 10);
                 done();
             });
